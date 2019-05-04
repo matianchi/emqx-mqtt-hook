@@ -271,7 +271,7 @@ parse_rule(Rules) ->
 parse_rule([], Acc) ->
     lists:reverse(Acc);
 parse_rule([{Rule, Conf} | Rules], Acc) ->
-    {_, Params} = mochijson2:decode(Conf),
+    {_, Params} = emqx_json:decode(Conf),
     Action = proplists:get_value(<<"action">>, Params),
     Filter = proplists:get_value(<<"topic">>, Params),
     parse_rule(Rules, [{list_to_atom(Rule), Action, Filter} | Acc]).
