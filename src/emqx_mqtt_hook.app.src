@@ -1,0 +1,7 @@
+{application,emqx_mqtt_hook,
+             [{description,"EMQ X Webhook Plugin"},
+              {vsn,"git"},
+              {modules,[]},
+              {registered,[emqx_mqtt_hook_sup]},
+              {applications,[kernel,stdlib,jsx,clique]},
+              {mod,{emqx_mqtt_hook_app,[]}}]}.

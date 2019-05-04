@@ -1,3 +1,7 @@
+{mapping, "mqtt.hook.api.url", "emqx_mqtt_hook.url", [
+  {datatype, string}
+]}.
+
 {mapping, "mqtt.hook.rule.client.connected.$name", "emqx_mqtt_hook.rules", [
   {datatype, string}
 ]}.
@@ -30,7 +34,7 @@
   {datatype, string}
 ]}.
 
-{mapping, "mqtt.hook.rule.message.mqttlish.$name", "emqx_mqtt_hook.rules", [
+{mapping, "mqtt.hook.rule.message.publish.$name", "emqx_mqtt_hook.rules", [
   {datatype, string}
 ]}.
 
@@ -38,7 +42,7 @@
   {datatype, string}
 ]}.
 
-{mapping, "mqtt.hook.rule.message.delivered.$name", "emqx_mqtt_hook.rules", [
+{mapping, "mqtt.hook.rule.message.deliver.$name", "emqx_mqtt_hook.rules", [
   {datatype, string}
 ]}.
 
