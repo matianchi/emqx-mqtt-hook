@@ -60,7 +60,7 @@ unload() ->
 
 on_client_connected(#{client_id := ClientId, username := Username}, 0, ConnInfo, _Env) ->
     {IpAddr, _Port} = maps:get(peername, ConnInfo),
-    Payload = emqx_json:encode([{action, <<"client_connected">>},
+    Payload = jsx:encode([{action, <<"client_connected">>},
                                  {clientid, ClientId},
                                  {username, Username},
                                  {keepalive, maps:get(keepalive, ConnInfo)},
@@ -84,7 +84,7 @@ on_client_disconnected(Client, {shutdown, Reason}, Env) when is_atom(Reason) ->
     on_client_disconnected(Reason, Client, Env);
 on_client_disconnected(#{client_id := ClientId, username := Username}, Reason, _Env)
     when is_atom(Reason) ->
-    Payload = emqx_json:encode([{action, <<"client_disconnected">>},
+    Payload = jsx:encode([{action, <<"client_disconnected">>},
                                  {clientid, ClientId},
                                  {username, Username},
                                  {reason, Reason}]),
@@ -103,7 +103,7 @@ on_client_subscribe(#{client_id := ClientId, username := Username}, TopicTable, 
     lists:foreach(fun({Topic, Opts}) ->
       with_filter(
         fun() ->
-        Payload = emqx_json:encode([{action, <<"client_subscribe">>},
+        Payload = jsx:encode([{action, <<"client_subscribe">>},
                                      {clientid, ClientId},
                                      {username, Username},
                                      {topic, Topic},
@@ -121,7 +121,7 @@ on_client_unsubscribe(#{client_id := ClientId, username := Username}, TopicTable
     lists:foreach(fun({Topic, Opts}) ->
       with_filter(
         fun() ->
-        Payload = emqx_json:encode([{action, <<"client_unsubscribe">>},
+        Payload = jsx:encode([{action, <<"client_unsubscribe">>},
                                      {clientid, ClientId},
                                      {username, Username},
                                      {topic, Topic},
@@ -136,7 +136,7 @@ on_client_unsubscribe(#{client_id := ClientId, username := Username}, TopicTable
 %%--------------------------------------------------------------------
 
 on_session_created(#{client_id := ClientId}, SessInfo, _Env) ->
-    Payload = emqx_json:encode([{action, session_created},
+    Payload = jsx:encode([{action, session_created},
                                  {clientid, ClientId},
                                  {username, proplists:get_value(username, SessInfo)}]),
     Msg = message(qos(), listener_name(), Payload),
@@ -150,7 +150,7 @@ on_session_created(#{client_id := ClientId}, SessInfo, _Env) ->
 on_session_subscribed(#{client_id := ClientId}, Topic, Opts, {Filter}) ->
     with_filter(
       fun() ->
-        Payload = emqx_json:encode([{action, session_subscribed},
+        Payload = jsx:encode([{action, session_subscribed},
                                      {clientid, ClientId},
                                      {topic, Topic},
                                      {opts, Opts}]),
@@ -166,7 +166,7 @@ on_session_subscribed(#{client_id := ClientId}, Topic, Opts, {Filter}) ->
 on_session_unsubscribed(#{client_id := ClientId}, Topic, _Opts, {Filter}) ->
     with_filter(
       fun() ->
-        Payload = emqx_json:encode([{action, session_unsubscribed},
+        Payload = jsx:encode([{action, session_unsubscribed},
                                      {clientid, ClientId},
                                      {topic, Topic}]),
         Msg = message(qos(), listener_name(), Payload),
@@ -180,7 +180,7 @@ on_session_unsubscribed(#{client_id := ClientId}, Topic, _Opts, {Filter}) ->
 on_session_terminated(Info, {shutdown, Reason}, Env) when is_atom(Reason) ->
     on_session_terminated(Info, Reason, Env);
 on_session_terminated(#{client_id := ClientId}, Reason, _Env) when is_atom(Reason) ->
-    Payload = emqx_json:encode([{action, session_terminated},
+    Payload = jsx:encode([{action, session_terminated},
                                  {clientid, ClientId},
                                  {reason, Reason}]),
     Msg = message(qos(), listener_name(), Payload),
@@ -202,7 +202,7 @@ on_message_publish(Message = #message{topic = Topic, flags = #{retain := Retain}
     with_filter(
       fun() ->
         {FromClientId, FromUsername} = format_from(Message),
-        Payload = emqx_json:encode([{action, message_publish},
+        Payload = jsx:encode([{action, message_publish},
                                    {from_client_id, FromClientId},
                                    {from_username, FromUsername},
                                    {topic, Message#message.topic},
@@ -226,7 +226,7 @@ on_message_deliver(#{client_id := ClientId, username := Username}, Message = #me
   with_filter(
     fun() ->
       {FromClientId, FromUsername} = format_from(Message),
-      Payload = emqx_json:encode([{action, message_delivered},
+      Payload = jsx:encode([{action, message_delivered},
                                    {client_id, ClientId},
                                    {username, Username},
                                    {from_client_id, FromClientId},
@@ -249,7 +249,7 @@ on_message_acked(#{client_id := ClientId}, Message = #message{topic = Topic, fla
   with_filter(
     fun() ->
         {FromClientId, FromUsername} = format_from(Message),
-        Payload = emqx_json:encode([{action, message_acked},
+        Payload = jsx:encode([{action, message_acked},
                                    {client_id, ClientId},
                                    {from_client_id, FromClientId},
                                    {from_username, FromUsername},
@@ -271,7 +271,7 @@ parse_rule(Rules) ->
 parse_rule([], Acc) ->
     lists:reverse(Acc);
 parse_rule([{Rule, Conf} | Rules], Acc) ->
-    {_, Params} = emqx_json:decode(Conf),
+    Params = jsx:decode(iolist_to_binary(Conf)),
     Action = proplists:get_value(<<"action">>, Params),
     Filter = proplists:get_value(<<"topic">>, Params),
     parse_rule(Rules, [{list_to_atom(Rule), Action, Filter} | Acc]).
